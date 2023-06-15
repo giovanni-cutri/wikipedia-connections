@@ -197,7 +197,7 @@ def neighbors_for_person(person_id):
     """
     res = requests.get(person_id)
     soup = bs4.BeautifulSoup(res.text, "lxml")
-    pages_ids = ["https://it.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']")]
+    pages_ids = ["https://it.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']") if ":" not in page]  # ignore special namespaces
     pages_titles = [urllib.parse.unquote(page_id.split("/")[-1]).replace("_", " ") for page_id in pages_ids]
 
     neighbors = list(zip(pages_ids, pages_titles))

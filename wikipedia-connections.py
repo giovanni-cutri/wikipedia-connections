@@ -6,54 +6,6 @@ import validators
 
 from util import Node, StackFrontier, QueueFrontier
 
-# Maps names to a set of corresponding person_ids
-names = {}
-
-# Maps person_ids to a dictionary of: name, birth, movies (a set of movie_ids)
-people = {}
-
-# Maps movie_ids to a dictionary of: title, year, stars (a set of person_ids)
-movies = {}
-
-
-def load_data(directory):
-    """
-    Load data from CSV files into memory.
-    """
-    # Load people
-    with open(f"{directory}/people.csv", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            people[row["id"]] = {
-                "name": row["name"],
-                "birth": row["birth"],
-                "movies": set()
-            }
-            if row["name"].lower() not in names:
-                names[row["name"].lower()] = {row["id"]}
-            else:
-                names[row["name"].lower()].add(row["id"])
-
-    # Load movies
-    with open(f"{directory}/movies.csv", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            movies[row["id"]] = {
-                "title": row["title"],
-                "year": row["year"],
-                "stars": set()
-            }
-
-    # Load stars
-    with open(f"{directory}/stars.csv", encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            try:
-                people[row["person_id"]]["movies"].add(row["movie_id"])
-                movies[row["movie_id"]]["stars"].add(row["person_id"])
-            except KeyError:
-                pass
-
 
 def main():
 
@@ -70,11 +22,15 @@ def main():
         print("Not connected.")
     else:
         degrees = len(path)
-        print(f"\n{degrees} degrees of separation.\n")
+        if degrees != 1:
+            print(f"\n{degrees} degree of separation.\n")
+        else:
+            print(f"\n{degrees} degrees of separation.\n")
         path = [(urllib.parse.unquote(source.split("/")[-1]).replace("_", " "), source)] + path
         for count, i in enumerate(range(degrees + 1)):
             if count !=0 and count != degrees:
-                print("-> ", end="")
+                print("\t", end="")
+            print("-> ", end="")
             print(f"{path[i][0]} - {path[i][1]}")
             # print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
@@ -135,7 +91,6 @@ def shortest_path(source, target):
                 frontier.add(child)
 
 
-
 def person_id_for_name(title):
     """
     Returns the IMDB id for a person's name,
@@ -155,40 +110,6 @@ def person_id_for_name(title):
     
     return None
 
-    print(res.status_code)
-    input()
-    if res.status_code == 200:
-        return name
-
-    url = "https://it.wikipedia.org/wiki/" + urllib.parse.quote(name, safe='/', encoding=None, errors=None)
-    print(url)
-    input()
-    res = requests.get(url)
-    if res.status_code == 200:
-        return url
-    
-    return None
-
-    person_ids = list(names.get(name.lower(), set()))
-    if len(person_ids) == 0:
-        return None
-    elif len(person_ids) > 1:
-        print(f"Which '{name}'?")
-        for person_id in person_ids:
-            person = people[person_id]
-            name = person["name"]
-            birth = person["birth"]
-            print(f"ID: {person_id}, Name: {name}, Birth: {birth}")
-        try:
-            person_id = input("Intended Person ID: ")
-            if person_id in person_ids:
-                return person_id
-        except ValueError:
-            pass
-        return None
-    else:
-        return person_ids[0]
-
 
 def neighbors_for_person(person_id):
     """
@@ -197,7 +118,8 @@ def neighbors_for_person(person_id):
     """
     res = requests.get(person_id)
     soup = bs4.BeautifulSoup(res.text, "lxml")
-    pages_ids = ["https://it.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']") if ":" not in page]  # ignore special namespaces
+
+    pages_ids = ["https://it.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']") if ":" not in str(page)]  # ignore special namespaces
     pages_titles = [urllib.parse.unquote(page_id.split("/")[-1]).replace("_", " ") for page_id in pages_ids]
 
     neighbors = list(zip(pages_ids, pages_titles))

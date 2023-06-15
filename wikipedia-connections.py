@@ -1,4 +1,5 @@
 import bs4
+import csv
 import requests
 import sys
 import urllib.parse
@@ -9,7 +10,9 @@ from util import Node, StackFrontier, QueueFrontier
 
 def main():
 
-    source = person_id_for_name(input("Name: "))
+    language_code = get_language_code(input("Wikipedia Language: "))
+    
+    source = page_id_for_title(input("Title: "))
     if source is None:
         sys.exit("Person not found.")
     target = person_id_for_name(input("Name: "))
@@ -22,14 +25,12 @@ def main():
         print("Not connected.")
     else:
         degrees = len(path)
-        if degrees != 1:
+        if degrees == 1:
             print(f"\n{degrees} degree of separation.\n")
         else:
             print(f"\n{degrees} degrees of separation.\n")
         path = [(urllib.parse.unquote(source.split("/")[-1]).replace("_", " "), source)] + path
-        for count, i in enumerate(range(degrees + 1)):
-            if count !=0 and count != degrees:
-                print("\t", end="")
+        for i in range(degrees + 1):
             print("-> ", end="")
             print(f"{path[i][0]} - {path[i][1]}")
             # print(f"{i + 1}: {person1} and {person2} starred in {movie}")
@@ -91,10 +92,28 @@ def shortest_path(source, target):
                 frontier.add(child)
 
 
-def person_id_for_name(title):
+def get_language_code(language):
     """
-    Returns the IMDB id for a person's name,
-    resolving ambiguities as needed.
+    Gets the corresponding Wikipedia language code
+    """
+
+    editions = []
+
+    with open ("data/list_of_wikipedias.csv", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            edition = (row["Language"].lower(), row["Language (local)"].lower(), row["Wiki"])
+            editions.append(edition)
+    
+    for edition in editions:
+        if language.lower() in edition:
+            language_code = edition[2]
+            return language_code
+
+
+def page_id_for_title(title):
+    """
+    Returns the page id for the title provided by the user
     """
 
     if not validators.url(title):

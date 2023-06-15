@@ -69,16 +69,14 @@ def main():
     if path is None:
         print("Not connected.")
     else:
-        print(path)
-        input()
         degrees = len(path)
-        print(f"{degrees} degrees of separation.")
+        print(f"\n{degrees} degrees of separation.\n")
         path = [(None, source)] + path
-        for i in range(degrees):
-            person1 = people[path[i][1]]["name"]
-            person2 = people[path[i + 1][1]]["name"]
-            movie = movies[path[i + 1][0]]["title"]
-            print(f"{i + 1}: {person1} and {person2} starred in {movie}")
+        for count, i in enumerate(range(degrees + 1)):
+            if count !=0 and count != degrees:
+                print("-> ", end="")
+            print(path[i][1])
+            # print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
 def shortest_path(source, target):

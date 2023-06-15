@@ -64,15 +64,13 @@ def main():
     if target is None:
         sys.exit("Person not found.")
 
-    print(source)
-    print(target)
-    return
-
     path = shortest_path(source, target)
 
     if path is None:
         print("Not connected.")
     else:
+        print(path)
+        input()
         degrees = len(path)
         print(f"{degrees} degrees of separation.")
         path = [(None, source)] + path
@@ -117,10 +115,12 @@ def shortest_path(source, target):
         explored.add(node.state)
 
         # Add neighbors to frontier
-        for action, state in neighbors_for_person(node.state):
+        for state in neighbors_for_person(node.state):
+
             if not frontier.contains_state(state) and state not in explored:
-                child = Node(state=state, parent=node, action=action)
-                
+
+                child = Node(state=state, parent=node, action="hey")
+  
                 # If node is the goal, then we have a solution
                 if child.state == target:
                     movies = []
@@ -145,7 +145,9 @@ def person_id_for_name(title):
     """
 
     if not validators.url(title):
-        url = "https://it.wikipedia.org/wiki/" + urllib.parse.quote(title, safe='/', encoding=None, errors=None)
+        url = "https://it.wikipedia.org/wiki/" + urllib.parse.quote(title, safe='/', encoding=None, errors=None)\
+            .replace("%20", "_")  # Wikipedia encodes URLS normally in its wikilinks, except
+                                  # for whitespaces, which are replaced by '_'
     else:
         url = title
     
@@ -195,12 +197,12 @@ def neighbors_for_person(person_id):
     Returns (movie_id, person_id) pairs for people
     who starred with a given person.
     """
-    movie_ids = people[person_id]["movies"]
-    neighbors = set()
-    for movie_id in movie_ids:
-        for person_id in movies[movie_id]["stars"]:
-            neighbors.add((movie_id, person_id))
-    return neighbors
+
+    res = requests.get(person_id)
+    soup = bs4.BeautifulSoup(res.text, "lxml")
+    pages_ids = ["https://it.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']")]
+
+    return pages_ids
 
 
 if __name__ == "__main__":

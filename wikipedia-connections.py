@@ -10,45 +10,40 @@ from util import Node, StackFrontier, QueueFrontier
 
 def main():
 
+    global language_code
     language_code = get_language_code(input("Wikipedia Language: "))
-    
-    source = page_id_for_title(input("Title: "))
+    if language_code is None:
+        sys.exit("Invalid language.")
+
+    source = page_id_for_title(input("Title of the initial article: "))
     if source is None:
-        sys.exit("Person not found.")
-    target = person_id_for_name(input("Name: "))
+        sys.exit("Article not found.")
+    target = page_id_for_title(input("Title of the target article: "))
     if target is None:
-        sys.exit("Person not found.")
+        sys.exit("Article not found.")
 
     path = shortest_path(source, target)
 
-    if path is None:
-        print("Not connected.")
-    else:
-        degrees = len(path)
-        if degrees == 1:
-            print(f"\n{degrees} degree of separation.\n")
-        else:
-            print(f"\n{degrees} degrees of separation.\n")
-        path = [(urllib.parse.unquote(source.split("/")[-1]).replace("_", " "), source)] + path
-        for i in range(degrees + 1):
-            print("-> ", end="")
-            print(f"{path[i][0]} - {path[i][1]}")
-            # print(f"{i + 1}: {person1} and {person2} starred in {movie}")
+    print_result(path, source)
 
 
 def shortest_path(source, target):
     """
-    Returns the shortest list of (movie_id, person_id) pairs
+    Returns the shortest list of articles
     that connect the source to the target.
 
     If no possible path, returns None.
     """
 
+    # If source and target coincide, return empty path
+    if source == target:
+        return ""
+
     # Keep track of number of states explored
     num_explored = 0
 
     # Initialize frontier to just the starting position
-    start = Node(state=source, parent=None, action=urllib.parse.unquote(source.split("/")[-1]).replace("_", " "))
+    start = Node(state=source, parent=None, action=get_title_for_page_id(source))
     frontier = QueueFrontier()
     frontier.add(start)
 
@@ -70,7 +65,7 @@ def shortest_path(source, target):
         explored.add(node.state)
 
         # Add neighbors to frontier
-        for state, title in neighbors_for_person(node.state):
+        for state, title in neighbors_for_article(node.state):
 
             if not frontier.contains_state(state) and state not in explored:
 
@@ -78,15 +73,15 @@ def shortest_path(source, target):
   
                 # If node is the goal, then we have a solution
                 if child.state == target:
-                    movies = []
-                    people = []
+                    titles = []
+                    ids = []
                     while child.parent is not None:
-                        movies.append(child.action)
-                        people.append(child.state)
+                        titles.append(child.action)
+                        ids.append(child.state)
                         child = child.parent
-                    movies.reverse()
-                    people.reverse()
-                    solution = list(zip(movies, people))
+                    titles.reverse()
+                    ids.reverse()
+                    solution = list(zip(titles, ids))
                     return solution
                 
                 frontier.add(child)
@@ -109,6 +104,8 @@ def get_language_code(language):
         if language.lower() in edition:
             language_code = edition[2]
             return language_code
+    
+    return None
 
 
 def page_id_for_title(title):
@@ -130,20 +127,51 @@ def page_id_for_title(title):
     return None
 
 
-def neighbors_for_person(person_id):
+def get_title_for_page_id(page_id):
     """
-    Returns (movie_id, person_id) pairs for people
-    who starred with a given person.
+    Returns the title for the page id provided as a parameter
     """
-    res = requests.get(person_id)
+
+    return urllib.parse.unquote(page_id.split("/")[-1]).replace("_", " ")
+
+
+def neighbors_for_article(page_id):
+    """
+    Returns (page_id, page_title) pairs for pages
+    who are connected with the article provided as a parameter.
+    """
+    res = requests.get(page_id)
     soup = bs4.BeautifulSoup(res.text, "lxml")
 
-    pages_ids = ["https://it.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']") if ":" not in str(page)]  # ignore special namespaces
-    pages_titles = [urllib.parse.unquote(page_id.split("/")[-1]).replace("_", " ") for page_id in pages_ids]
+    pages_ids = [f"https://{language_code}.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']") if ":" not in str(page)]  # ignore special namespaces
+    pages_titles = [get_title_for_page_id(page_id) for page_id in pages_ids]
 
     neighbors = list(zip(pages_ids, pages_titles))
 
     return neighbors
+
+
+def print_result(path, source):
+    """
+    Prints the resulting path
+    """
+
+    if path is None:
+        print("\nArticles are not connected.")
+    elif path == "":
+        print("\nThe two articles coincide.")
+    else:
+        degrees = len(path)
+        if degrees == 1:
+            print(f"\n{degrees} degree of separation.\n")
+        else:
+            print(f"\n{degrees} degrees of separation.\n")
+
+        path = [(get_title_for_page_id(source), source)] + path
+
+        for i in range(degrees + 1):
+            print("-> ", end="")
+            print(f"{path[i][0]} - {path[i][1]}")
 
 
 if __name__ == "__main__":

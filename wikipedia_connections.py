@@ -10,24 +10,22 @@ from util import Node, StackFrontier, QueueFrontier
 
 def main():
 
-    global language_code
     language_code = get_language_code(input("Wikipedia Language: "))
     if language_code is None:
         sys.exit("Invalid language.")
-
-    source = page_id_for_title(input("Title of the initial article: "))
+    source = get_page_id_for_title(input("Title of the initial article: "))
     if source is None:
         sys.exit("Article not found.")
-    target = page_id_for_title(input("Title of the target article: "))
+    target = get_page_id_for_title(input("Title of the target article: "))
     if target is None:
         sys.exit("Article not found.")
 
-    path = shortest_path(source, target)
-
+    path = shortest_path(language_code, source, target)
+    
     print_result(path, source)
 
 
-def shortest_path(source, target):
+def shortest_path(language_code, source, target):
     """
     Returns the shortest list of articles
     that connect the source to the target.
@@ -65,7 +63,7 @@ def shortest_path(source, target):
         explored.add(node.state)
 
         # Add neighbors to frontier
-        for state, title in neighbors_for_article(node.state):
+        for state, title in neighbors_for_article(language_code, node.state):
 
             if not frontier.contains_state(state) and state not in explored:
 
@@ -108,7 +106,7 @@ def get_language_code(language):
     return None
 
 
-def page_id_for_title(title):
+def get_page_id_for_title(title):
     """
     Returns the page id for the title provided by the user
     """
@@ -135,7 +133,7 @@ def get_title_for_page_id(page_id):
     return urllib.parse.unquote(page_id.split("/")[-1]).replace("_", " ")
 
 
-def neighbors_for_article(page_id):
+def neighbors_for_article(language_code, page_id):
     """
     Returns (page_id, page_title) pairs for pages
     who are connected with the article provided as a parameter.

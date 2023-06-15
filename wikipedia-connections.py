@@ -71,11 +71,11 @@ def main():
     else:
         degrees = len(path)
         print(f"\n{degrees} degrees of separation.\n")
-        path = [(None, source)] + path
+        path = [(urllib.parse.unquote(source.split("/")[-1]).replace("_", " "), source)] + path
         for count, i in enumerate(range(degrees + 1)):
             if count !=0 and count != degrees:
                 print("-> ", end="")
-            print(path[i][1])
+            print(f"{path[i][0]} - {path[i][1]}")
             # print(f"{i + 1}: {person1} and {person2} starred in {movie}")
 
 
@@ -91,7 +91,7 @@ def shortest_path(source, target):
     num_explored = 0
 
     # Initialize frontier to just the starting position
-    start = Node(state=source, parent=None, action=None)
+    start = Node(state=source, parent=None, action=urllib.parse.unquote(source.split("/")[-1]).replace("_", " "))
     frontier = QueueFrontier()
     frontier.add(start)
 
@@ -113,11 +113,11 @@ def shortest_path(source, target):
         explored.add(node.state)
 
         # Add neighbors to frontier
-        for state in neighbors_for_person(node.state):
+        for state, title in neighbors_for_person(node.state):
 
             if not frontier.contains_state(state) and state not in explored:
 
-                child = Node(state=state, parent=node, action="hey")
+                child = Node(state=state, parent=node, action=title)
   
                 # If node is the goal, then we have a solution
                 if child.state == target:
@@ -195,12 +195,14 @@ def neighbors_for_person(person_id):
     Returns (movie_id, person_id) pairs for people
     who starred with a given person.
     """
-
     res = requests.get(person_id)
     soup = bs4.BeautifulSoup(res.text, "lxml")
     pages_ids = ["https://it.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']")]
+    pages_titles = [urllib.parse.unquote(page_id.split("/")[-1]).replace("_", " ") for page_id in pages_ids]
 
-    return pages_ids
+    neighbors = list(zip(pages_ids, pages_titles))
+
+    return neighbors
 
 
 if __name__ == "__main__":

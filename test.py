@@ -1,7 +1,5 @@
 # Import the unittest library and the "shortest_path" function
 import unittest
-import sys
-sys.path.insert(0, '../')
 from wikipedia_connections import shortest_path
 
 # A class containing all the tests

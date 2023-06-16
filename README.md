@@ -4,7 +4,14 @@ Find the shortest path between two Wikipedia articles using the breadth-first se
 
 # Usage
 
-Download the repository and run *wikipedia_connections.py*.
+- Clone this repository to your local machine.
+- Ensure that you have installed Python.
+- Install the dependencies listed in *requirements.txt*.
+  
+  ````
+  pip install -r requirements.txt
+  ````
+- Run *wikipedia_connections.py*.
 
 You will be prompted to provide the language of the Wikipedia edition you want to use, the title of the initial article and the title of the final article.
 

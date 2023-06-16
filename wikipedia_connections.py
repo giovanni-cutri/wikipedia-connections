@@ -102,9 +102,9 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument("language", help="the language of the Wikipedia edition you want to use for the search")
     parser.add_argument("initial_article", help="the title of the article from which you want to start the search")
-    parser.add_argument("target_article", help="the title of the article which must be reached")
+    parser.add_argument("final_article", help="the title of the article which must be reached")
     args = parser.parse_args()
-    return (args.language, args.initial_article, args.target_article)
+    return (args.language, args.initial_article, args.final_article)
 
 
 def get_language_code(language):

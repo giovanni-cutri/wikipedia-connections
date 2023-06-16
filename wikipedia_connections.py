@@ -26,19 +26,22 @@ def main():
     language_code = get_language_code(language)
     if language_code is None:
         sys.exit("Invalid language.")
-    source = get_page_id_for_title(initial_article)
+    
+    base_url = f"https://{language_code}.wikipedia.org"
+
+    source = get_page_id_for_title(initial_article, base_url)
     if source is None:
         sys.exit("Initial article not found.")
-    target = get_page_id_for_title(final_article)
+    target = get_page_id_for_title(final_article, base_url)
     if target is None:
         sys.exit("Final article not found.")
 
-    path = shortest_path(language_code, source, target)
+    path = shortest_path(base_url, source, target)
     
     print_result(path, source)
 
 
-def shortest_path(language_code, source, target):
+def shortest_path(base_url, source, target):
     """
     Returns the shortest list of articles
     that connect the source to the target.
@@ -76,7 +79,7 @@ def shortest_path(language_code, source, target):
         explored.add(node.state)
 
         # Add neighbors to frontier
-        for state, title in neighbors_for_article(language_code, node.state):
+        for state, title in neighbors_for_article(base_url, node.state):
 
             if not frontier.contains_state(state) and state not in explored:
 
@@ -128,13 +131,13 @@ def get_language_code(language):
     return None
 
 
-def get_page_id_for_title(title):
+def get_page_id_for_title(title, base_url):
     """
     Returns the page id for the title provided by the user
     """
 
     if not validators.url(title):
-        url = "https://it.wikipedia.org/wiki/" + urllib.parse.quote(title, safe='/', encoding=None, errors=None)\
+        url = base_url + "/wiki/" + urllib.parse.quote(title, safe='/', encoding=None, errors=None)\
             .replace("%20", "_")  # Wikipedia encodes URLS normally in its wikilinks, except
                                   # for whitespaces, which are replaced by '_'
     else:
@@ -155,15 +158,15 @@ def get_title_for_page_id(page_id):
     return urllib.parse.unquote(page_id.split("/")[-1]).replace("_", " ")
 
 
-def neighbors_for_article(language_code, page_id):
+def neighbors_for_article(base_url, page_id):
     """
     Returns (page_id, page_title) pairs for pages
     who are connected with the article provided as a parameter.
     """
     res = requests.get(page_id)
     soup = bs4.BeautifulSoup(res.text, "lxml")
-
-    pages_ids = [f"https://{language_code}.wikipedia.org" + page.attrs["href"] for page in soup.select("a[href^='/wiki/']") if ":" not in str(page)]  # ignore special namespaces
+  
+    pages_ids = [base_url + page.attrs["href"] for page in soup.select("a[href^='/wiki/']") if ":" not in str(page)]  # ignore special namespaces
     pages_titles = [get_title_for_page_id(page_id) for page_id in pages_ids]
 
     neighbors = list(zip(pages_ids, pages_titles))

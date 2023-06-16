@@ -1,3 +1,4 @@
+import argparse
 import bs4
 import csv
 import lxml
@@ -11,15 +12,26 @@ from util import Node, StackFrontier, QueueFrontier
 
 def main():
 
-    language_code = get_language_code(input("Wikipedia Language: "))
+    if len(sys.argv) == 4:
+        (language, initial_article, final_article) = parse_arguments()
+
+    elif len(sys.argv) == 1:
+        language = input("Wikipedia Language: ")
+        initial_article = input("Title of the initial article: ")
+        final_article = input("Title of the target article: ")
+
+    else:
+        sys.exit("Invalid usage.")
+
+    language_code = get_language_code(language)
     if language_code is None:
         sys.exit("Invalid language.")
-    source = get_page_id_for_title(input("Title of the initial article: "))
+    source = get_page_id_for_title(initial_article)
     if source is None:
-        sys.exit("Article not found.")
-    target = get_page_id_for_title(input("Title of the target article: "))
+        sys.exit("Initial article not found.")
+    target = get_page_id_for_title(final_article)
     if target is None:
-        sys.exit("Article not found.")
+        sys.exit("Final article not found.")
 
     path = shortest_path(language_code, source, target)
     
@@ -84,6 +96,15 @@ def shortest_path(language_code, source, target):
                     return solution
                 
                 frontier.add(child)
+
+
+def parse_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("language", help="the language of the Wikipedia edition you want to use for the search")
+    parser.add_argument("initial_article", help="the title of the article from which you want to start the search")
+    parser.add_argument("target_article", help="the title of the article which must be reached")
+    args = parser.parse_args()
+    return (args.language, args.initial_article, args.target_article)
 
 
 def get_language_code(language):

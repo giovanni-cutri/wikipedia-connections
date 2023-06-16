@@ -144,9 +144,11 @@ def get_page_id_for_title(title, base_url):
         url = base_url + "/wiki/" + urllib.parse.quote(title, safe='/', encoding=None, errors=None)\
             .replace("%20", "_")  # Wikipedia encodes URLS normally in its wikilinks, except
                                   # for whitespaces, which are replaced by '_'
+    elif ".wikipedia.org/wiki" not in title:
+        sys.exit("Not a valid Wikipedia URL.")
     else:
         url = title
-    
+
     res = requests.get(url)
     if res.status_code == 200:
         return url

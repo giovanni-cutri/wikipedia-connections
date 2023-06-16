@@ -102,7 +102,7 @@ def shortest_path(base_url, source, target):
 
 
 def parse_arguments():
-     """
+    """
     Parses command-line arguments
     """
     

@@ -102,6 +102,10 @@ def shortest_path(base_url, source, target):
 
 
 def parse_arguments():
+     """
+    Parses command-line arguments
+    """
+    
     parser = argparse.ArgumentParser()
     parser.add_argument("language", help="the language of the Wikipedia edition you want to use for the search")
     parser.add_argument("initial_article", help="the title of the article from which you want to start the search")

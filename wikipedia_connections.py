@@ -167,7 +167,7 @@ def get_title_for_page_id(page_id):
 def neighbors_for_article(base_url, page_id):
     """
     Returns (page_id, page_title) pairs for pages
-    who are connected with the article provided as a parameter.
+    which are connected with the article provided as a parameter.
     """
     res = requests.get(page_id)
     soup = bs4.BeautifulSoup(res.text, "lxml")

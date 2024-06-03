@@ -2,6 +2,8 @@
  
 Find the shortest path between two Wikipedia articles using the breadth-first search algorithm.
 
+Inspired by [this](https://cs50.harvard.edu/ai/2020/projects/0/degrees/) CS50 Project.
+
 # Usage
 
 - Clone this repository to your local machine.

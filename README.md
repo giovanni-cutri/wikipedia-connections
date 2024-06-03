@@ -1,6 +1,6 @@
 # Wikipedia Connections
  
-Find the shortest path between two Wikipedia articles using the breadth-first search algorithm.
+Find the shortest path between two [Wikipedia](https://en.wikipedia.org/) articles using the breadth-first search algorithm.
 
 Inspired by [this](https://cs50.harvard.edu/ai/2020/projects/0/degrees/) CS50 Project.
 

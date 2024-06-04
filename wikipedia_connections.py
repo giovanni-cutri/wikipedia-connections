@@ -125,10 +125,13 @@ def get_language_code(language):
         reader = csv.DictReader(f)
         for row in reader:
             edition = (row["Language"].lower(), row["Language (local)"].lower(), row["Wiki"])
+            # e.g. edition = ("italian", "italiano", "it")
             editions.append(edition)
     
     for edition in editions:
+        # check if the input matches any of the three possible ways to indicate any Wiki's language
         if language.lower() in edition:
+            # if so, then return the corresponding two-letter code.
             language_code = edition[2]
             return language_code
     

@@ -20,7 +20,7 @@ You will be prompted to provide the language of the Wikipedia edition you want t
 Alternatively, you can provide the aforementioned information as three command-line arguments, like this:
 
 ````
-python wikipedia_connections.py [language] [initial_article] [final_article]
+python wikipedia_connections.py [language] [initial_article_url] [final_article_url]
 ````
 
 # License

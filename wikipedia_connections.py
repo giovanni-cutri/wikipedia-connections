@@ -17,8 +17,8 @@ def main():
 
     elif len(sys.argv) == 1:
         language = input("Wikipedia Language: ")
-        initial_article = input("Title of the initial article: ")
-        final_article = input("Title of the final article: ")
+        initial_article = input("Title (or URL) of the initial article: ")
+        final_article = input("Title (or URL) of the final article: ")
 
     else:
         sys.exit("Invalid usage.")

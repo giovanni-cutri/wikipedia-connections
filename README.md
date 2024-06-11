@@ -15,12 +15,12 @@ Inspired by [this](https://cs50.harvard.edu/ai/2020/projects/0/degrees/) CS50 Pr
   ````
 - Run *wikipedia_connections.py*.
 
-You will be prompted to provide the language of the Wikipedia edition you want to use, the title of the initial article and the title of the final article.
+You will be prompted to provide the language of the Wikipedia edition you want to use, the title (or URL) of the initial article and the title (or URL) of the final article.
 
 Alternatively, you can provide the aforementioned information as three command-line arguments, like this:
 
 ````
-python wikipedia_connections.py [language] [initial_article_url] [final_article_url]
+python wikipedia_connections.py [language] [initial_article] [final_article]
 ````
 
 # License
